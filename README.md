@@ -16,7 +16,7 @@
 Install the package using:
 
 ```bash
-go get github.com/containeroo/portpatrol/pkg/dynflags
+go get github.com/containeroo/dynflags
 ```
 
 ## Usage
@@ -26,7 +26,7 @@ It supports parsing flags with a structure like `--group.identifier.flag=value` 
 For POSIX/GNU-style `--flags` use the library [pflag](https://github.com/spf13/pflag). `dynflags` can be used together with `pflag`.
 
 ```go
-import "github.com/containeroo/portpatrol/pkg/dynflags"
+import "github.com/containeroo/dynflags"
 ```
 
 Create a new `DynFlags` instance:

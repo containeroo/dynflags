@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/containeroo/portpatrol/pkg/dynflags"
+	"github.com/containeroo/dynflags"
 	"github.com/stretchr/testify/assert"
 )
 
