@@ -17,7 +17,7 @@ func TestDynFlagsInitialization(t *testing.T) {
 		df := dynflags.New(dynflags.ContinueOnError)
 		assert.NotNil(t, df)
 		assert.NotNil(t, df.Config())
-		assert.NotNil(t, df.Parsed())
+		assert.NotNil(t, df.Parsed()) // df.Parsed() now returns ParsedGroups with GroupsMap internally
 	})
 }
 
@@ -70,11 +70,12 @@ func TestDynFlagsUsageOutput(t *testing.T) {
 func TestDynFlagsParsedAndUnknown(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Empty parsed and unknown groups", func(t *testing.T) {
+	t.Run("Empty parsed and unknown args", func(t *testing.T) {
 		t.Parallel()
 
 		df := dynflags.New(dynflags.ContinueOnError)
 
+		// With the new GroupsMap approach, this should still be empty initially:
 		assert.Empty(t, df.Parsed().Groups())
 		assert.Empty(t, df.UnknownArgs())
 	})
@@ -87,17 +88,24 @@ func TestParsedGroupMethods(t *testing.T) {
 		t.Parallel()
 
 		df := dynflags.New(dynflags.ContinueOnError)
+
+		// Define a flag in the "testGroup" config
 		df.Group("testGroup").String("flag1", "defaultValue", "Test flag")
+
+		// Parse actual CLI arguments
 		args := []string{"--testGroup.identifier1.flag1", "value1"}
 		err := df.Parse(args)
 		assert.NoError(t, err)
 
+		// Lookup the parsed data
 		parsedGroups := df.Parsed()
 		group := parsedGroups.Lookup("testGroup")
 		assert.NotNil(t, group)
 
 		identifier := group.Lookup("identifier1")
 		assert.NotNil(t, identifier)
+
+		// The flag should have the value we passed
 		assert.Equal(t, "value1", identifier.Lookup("flag1"))
 	})
 }
@@ -109,12 +117,15 @@ func TestDynFlagsUnknownArgs(t *testing.T) {
 		t.Parallel()
 
 		df := dynflags.New(dynflags.ContinueOnError)
+
+		// Passing an argument that won't parse
 		args := []string{
 			"--unparsable", "value1",
 		}
 		err := df.Parse(args)
 		assert.NoError(t, err)
 
+		// Confirm that the argument ended up in unparsedArgs
 		unparsedArgs := df.UnknownArgs()
 		assert.Contains(t, unparsedArgs, "--unparsable")
 	})

@@ -6,37 +6,35 @@ import (
 	"os"
 )
 
-// ParseBehavior defines how the parser handles errors
+// ParseBehavior defines how Parse should behave on errors.
 type ParseBehavior int
 
 const (
-	// Continue parsing on error
-	ContinueOnError ParseBehavior = iota
-	// Exit on error
-	ExitOnError
+	ContinueOnError ParseBehavior = iota // Continue parsing on error
+	ExitOnError                          // Exit on error
 )
 
 // DynFlags manages configuration and parsed values
 type DynFlags struct {
-	configGroups  map[string]*ConfigGroup   // Static parent groups
-	groupOrder    []string                  // Order of group names
-	SortGroups    bool                      // Sort groups in help message
-	SortFlags     bool                      // Sort flags in help message
-	parsedGroups  map[string][]*ParsedGroup // Parsed child groups organized by parent group
-	parseBehavior ParseBehavior             // Parsing behavior
-	unparsedArgs  []string                  // Arguments that couldn't be parsed
-	output        io.Writer                 // Output for usage/help
-	usage         func()                    // Customizable usage function
-	title         string                    // Title in the help message
-	description   string                    // Description after the title in the help message
-	epilog        string                    // Epilog in the help message
+	configGroups  map[string]*ConfigGroup // Static parent groups
+	groupOrder    []string                // Order of group names
+	SortGroups    bool                    // Sort groups in help message
+	SortFlags     bool                    // Sort flags in help message
+	parsedGroups  GroupsMap               // Parsed child groups organized by parent group
+	parseBehavior ParseBehavior           // Parsing behavior
+	unparsedArgs  []string                // Arguments that couldn't be parsed
+	output        io.Writer               // Output for usage/help
+	usage         func()                  // Customizable usage function
+	title         string                  // Title in the help message
+	description   string                  // Description after the title in the help message
+	epilog        string                  // Epilog in the help message
 }
 
 // New initializes a new DynFlags instance
 func New(behavior ParseBehavior) *DynFlags {
 	df := &DynFlags{
 		configGroups:  make(map[string]*ConfigGroup),
-		parsedGroups:  make(map[string][]*ParsedGroup),
+		parsedGroups:  make(GroupsMap),
 		parseBehavior: behavior,
 		output:        os.Stdout,
 	}
@@ -66,7 +64,6 @@ func (df *DynFlags) Group(name string) *ConfigGroup {
 	}
 
 	df.groupOrder = append(df.groupOrder, name)
-
 	group := &ConfigGroup{
 		Name:  name,
 		Flags: make(map[string]*Flag),

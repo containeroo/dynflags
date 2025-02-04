@@ -102,23 +102,29 @@ func (df *DynFlags) setFlagValue(parsedGroup *ParsedGroup, flagName string, flag
 		return fmt.Errorf("failed to set value for flag '%s': %v", flagName, err)
 	}
 
+	// Store the successfully parsed value
 	parsedGroup.Values[flagName] = parsedValue
 	return nil
 }
 
-// createOrGetParsedGroup retrieves or initializes a parsed group.
+// createOrGetParsedGroup retrieves or initializes a parsed group using the new GroupsMap/IdentifiersMap.
 func (df *DynFlags) createOrGetParsedGroup(parentGroup *ConfigGroup, identifier string) *ParsedGroup {
-	for _, group := range df.parsedGroups[parentGroup.Name] {
-		if group.Name == identifier {
-			return group
-		}
+	// Ensure the parent group name has an IdentifiersMap
+	if _, exists := df.parsedGroups[parentGroup.Name]; !exists {
+		df.parsedGroups[parentGroup.Name] = make(IdentifiersMap)
 	}
 
+	// Check if we already have a ParsedGroup for this identifier
+	if existingGroup, ok := df.parsedGroups[parentGroup.Name][identifier]; ok {
+		return existingGroup
+	}
+
+	// Otherwise, create a new ParsedGroup
 	newGroup := &ParsedGroup{
 		Parent: parentGroup,
 		Name:   identifier,
 		Values: make(map[string]interface{}),
 	}
-	df.parsedGroups[parentGroup.Name] = append(df.parsedGroups[parentGroup.Name], newGroup)
+	df.parsedGroups[parentGroup.Name][identifier] = newGroup
 	return newGroup
 }
