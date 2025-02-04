@@ -44,7 +44,7 @@ func (df *DynFlags) Parse(args []string) error {
 }
 
 // extractKeyValue extracts the key and value from an argument.
-func (df *DynFlags) extractKeyValue(arg string, args []string, index *int) (string, string, error) {
+func (df *DynFlags) extractKeyValue(arg string, args []string, index *int) (key, value string, err error) {
 	if !strings.HasPrefix(arg, "--") {
 		// Invalid argument format
 		return "", "", fmt.Errorf("invalid argument format: %s", arg)
@@ -69,7 +69,7 @@ func (df *DynFlags) extractKeyValue(arg string, args []string, index *int) (stri
 }
 
 // splitKey validates and splits a key into its components.
-func (df *DynFlags) splitKey(fullKey string) (string, string, string, error) {
+func (df *DynFlags) splitKey(fullKey string) (group, identifier, flag string, err error) {
 	parts := strings.Split(fullKey, ".")
 	if len(parts) != 3 {
 		return "", "", "", fmt.Errorf("flag must follow the pattern: --<group>.<identifier>.<flag>")
