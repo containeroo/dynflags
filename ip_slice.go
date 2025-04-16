@@ -10,14 +10,14 @@ type IPSlicesValue struct {
 	Bound *[]net.IP
 }
 
-func (i *IPSlicesValue) GetBound() interface{} {
+func (i *IPSlicesValue) GetBound() any {
 	if i.Bound == nil {
 		return nil
 	}
 	return *i.Bound
 }
 
-func (s *IPSlicesValue) Parse(value string) (interface{}, error) {
+func (s *IPSlicesValue) Parse(value string) (any, error) {
 	ip := net.ParseIP(value)
 	if ip == nil {
 		return nil, fmt.Errorf("invalid IP address: %s", value)
@@ -25,7 +25,7 @@ func (s *IPSlicesValue) Parse(value string) (interface{}, error) {
 	return ip, nil
 }
 
-func (s *IPSlicesValue) Set(value interface{}) error {
+func (s *IPSlicesValue) Set(value any) error {
 	if ip, ok := value.(net.IP); ok {
 		*s.Bound = append(*s.Bound, ip)
 		return nil

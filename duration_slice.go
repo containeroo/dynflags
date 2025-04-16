@@ -10,14 +10,14 @@ type DurationSlicesValue struct {
 	Bound *[]time.Duration
 }
 
-func (d *DurationSlicesValue) GetBound() interface{} {
+func (d *DurationSlicesValue) GetBound() any {
 	if d.Bound == nil {
 		return nil
 	}
 	return *d.Bound
 }
 
-func (d *DurationSlicesValue) Parse(value string) (interface{}, error) {
+func (d *DurationSlicesValue) Parse(value string) (any, error) {
 	parsed, err := time.ParseDuration(value)
 	if err != nil {
 		return nil, fmt.Errorf("invalid duration value: %s, error: %w", value, err)
@@ -25,7 +25,7 @@ func (d *DurationSlicesValue) Parse(value string) (interface{}, error) {
 	return parsed, nil
 }
 
-func (d *DurationSlicesValue) Set(value interface{}) error {
+func (d *DurationSlicesValue) Set(value any) error {
 	if parsedDuration, ok := value.(time.Duration); ok {
 		*d.Bound = append(*d.Bound, parsedDuration)
 		return nil

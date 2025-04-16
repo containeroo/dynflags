@@ -79,7 +79,7 @@ func TestGetIPSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": []net.IP{ip1, ip2}},
+			Values: map[string]any{"flag1": []net.IP{ip1, ip2}},
 		}
 
 		result, err := parsedGroup.GetIPSlices("flag1")
@@ -94,7 +94,7 @@ func TestGetIPSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": ip},
+			Values: map[string]any{"flag1": ip},
 		}
 
 		result, err := parsedGroup.GetIPSlices("flag1")
@@ -107,7 +107,7 @@ func TestGetIPSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 
 		result, err := parsedGroup.GetIPSlices("nonExistentFlag")
@@ -121,7 +121,7 @@ func TestGetIPSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": "invalid"},
+			Values: map[string]any{"flag1": "invalid"},
 		}
 
 		result, err := parsedGroup.GetIPSlices("flag1")

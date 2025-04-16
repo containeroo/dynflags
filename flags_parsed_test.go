@@ -15,7 +15,7 @@ func TestParsedGroup(t *testing.T) {
 
 		group := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": "value1"},
+			Values: map[string]any{"flag1": "value1"},
 		}
 
 		value := group.Lookup("flag1")
@@ -27,7 +27,7 @@ func TestParsedGroup(t *testing.T) {
 
 		group := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 
 		value := group.Lookup("flag1")
@@ -158,7 +158,7 @@ func TestParsedGroup_Lookup_NilHandling(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "identifier1",
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 
 		result := parsedGroup.Lookup("nonExistingFlag")

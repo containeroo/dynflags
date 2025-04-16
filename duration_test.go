@@ -78,7 +78,7 @@ func TestParsedGroup_GetDuration(t *testing.T) {
 
 		parsed := &dynflags.ParsedGroup{
 			Name:   "test",
-			Values: map[string]interface{}{"timeout": 30 * time.Second},
+			Values: map[string]any{"timeout": 30 * time.Second},
 		}
 		dur, err := parsed.GetDuration("timeout")
 		assert.NoError(t, err)
@@ -90,7 +90,7 @@ func TestParsedGroup_GetDuration(t *testing.T) {
 
 		parsed := &dynflags.ParsedGroup{
 			Name:   "test",
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 		_, err := parsed.GetDuration("missing")
 		assert.Error(t, err)
@@ -101,7 +101,7 @@ func TestParsedGroup_GetDuration(t *testing.T) {
 
 		parsed := &dynflags.ParsedGroup{
 			Name:   "test",
-			Values: map[string]interface{}{"timeout": "not a duration"},
+			Values: map[string]any{"timeout": "not a duration"},
 		}
 		_, err := parsed.GetDuration("timeout")
 		assert.Error(t, err)

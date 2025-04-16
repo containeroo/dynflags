@@ -9,18 +9,18 @@ type Float64Value struct {
 	Bound *float64
 }
 
-func (f *Float64Value) GetBound() interface{} {
+func (f *Float64Value) GetBound() any {
 	if f.Bound == nil {
 		return nil
 	}
 	return *f.Bound
 }
 
-func (i *Float64Value) Parse(value string) (interface{}, error) {
+func (i *Float64Value) Parse(value string) (any, error) {
 	return strconv.ParseFloat(value, 64)
 }
 
-func (i *Float64Value) Set(value interface{}) error {
+func (i *Float64Value) Set(value any) error {
 	if num, ok := value.(float64); ok {
 		*i.Bound = num
 		return nil

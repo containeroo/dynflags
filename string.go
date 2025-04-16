@@ -6,18 +6,18 @@ type StringValue struct {
 	Bound *string
 }
 
-func (s *StringValue) GetBound() interface{} {
+func (s *StringValue) GetBound() any {
 	if s.Bound == nil {
 		return nil
 	}
 	return *s.Bound
 }
 
-func (s *StringValue) Parse(value string) (interface{}, error) {
+func (s *StringValue) Parse(value string) (any, error) {
 	return value, nil
 }
 
-func (s *StringValue) Set(value interface{}) error {
+func (s *StringValue) Set(value any) error {
 	if str, ok := value.(string); ok {
 		*s.Bound = str
 		return nil

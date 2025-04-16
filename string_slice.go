@@ -9,18 +9,18 @@ type StringSlicesValue struct {
 	Bound *[]string
 }
 
-func (s *StringSlicesValue) GetBound() interface{} {
+func (s *StringSlicesValue) GetBound() any {
 	if s.Bound == nil {
 		return nil
 	}
 	return *s.Bound
 }
 
-func (s *StringSlicesValue) Parse(value string) (interface{}, error) {
+func (s *StringSlicesValue) Parse(value string) (any, error) {
 	return value, nil
 }
 
-func (s *StringSlicesValue) Set(value interface{}) error {
+func (s *StringSlicesValue) Set(value any) error {
 	if str, ok := value.(string); ok {
 		*s.Bound = append(*s.Bound, str)
 		return nil

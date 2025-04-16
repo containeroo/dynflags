@@ -10,14 +10,14 @@ type Float64SlicesValue struct {
 	Bound *[]float64
 }
 
-func (f *Float64SlicesValue) GetBound() interface{} {
+func (f *Float64SlicesValue) GetBound() any {
 	if f.Bound == nil {
 		return nil
 	}
 	return *f.Bound
 }
 
-func (f *Float64SlicesValue) Parse(value string) (interface{}, error) {
+func (f *Float64SlicesValue) Parse(value string) (any, error) {
 	parsed, err := strconv.ParseFloat(value, 64)
 	if err != nil {
 		return nil, fmt.Errorf("invalid float64 value: %s, error: %w", value, err)
@@ -25,7 +25,7 @@ func (f *Float64SlicesValue) Parse(value string) (interface{}, error) {
 	return parsed, nil
 }
 
-func (f *Float64SlicesValue) Set(value interface{}) error {
+func (f *Float64SlicesValue) Set(value any) error {
 	if parsedFloat, ok := value.(float64); ok {
 		*f.Bound = append(*f.Bound, parsedFloat)
 		return nil

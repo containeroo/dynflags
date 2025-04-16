@@ -85,7 +85,7 @@ func TestGetURLSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": []*url.URL{parsedURL1, parsedURL2}},
+			Values: map[string]any{"flag1": []*url.URL{parsedURL1, parsedURL2}},
 		}
 
 		result, err := parsedGroup.GetURLSlices("flag1")
@@ -100,7 +100,7 @@ func TestGetURLSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": parsedURL},
+			Values: map[string]any{"flag1": parsedURL},
 		}
 
 		result, err := parsedGroup.GetURLSlices("flag1")
@@ -113,7 +113,7 @@ func TestGetURLSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 
 		result, err := parsedGroup.GetURLSlices("nonExistentFlag")
@@ -127,7 +127,7 @@ func TestGetURLSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": 123}, // Invalid type (int)
+			Values: map[string]any{"flag1": 123}, // Invalid type (int)
 		}
 
 		result, err := parsedGroup.GetURLSlices("flag1")

@@ -89,7 +89,7 @@ func TestParsedGroupGetIP(t *testing.T) {
 		t.Parallel()
 
 		group := &dynflags.ParsedGroup{
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"ipFlag": net.ParseIP("192.168.1.1"),
 			},
 		}
@@ -102,7 +102,7 @@ func TestParsedGroupGetIP(t *testing.T) {
 		t.Parallel()
 
 		group := &dynflags.ParsedGroup{
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 		ip, err := group.GetIP("ipFlag")
 		assert.Error(t, err)
@@ -114,7 +114,7 @@ func TestParsedGroupGetIP(t *testing.T) {
 		t.Parallel()
 
 		group := &dynflags.ParsedGroup{
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"ipFlag": "not-an-ip",
 			},
 		}

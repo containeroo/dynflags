@@ -21,11 +21,11 @@ const (
 
 // Flag represents a single configuration flag
 type Flag struct {
-	Default interface{} // Default value for the flag
-	Type    FlagType    // Type of the flag
-	Usage   string      // Description for usage
-	metaVar string      // MetaVar for flag
-	value   FlagValue   // Encapsulated parsing and value-setting logic
+	Default any       // Default value for the flag
+	Type    FlagType  // Type of the flag
+	Usage   string    // Description for usage
+	metaVar string    // MetaVar for flag
+	value   FlagValue // Encapsulated parsing and value-setting logic
 }
 
 func (f *Flag) MetaVar(metaVar string) {
@@ -35,15 +35,15 @@ func (f *Flag) MetaVar(metaVar string) {
 // FlagValue interface encapsulates parsing and value-setting logic
 type FlagValue interface {
 	// Parse parses the given string value into the flag's value type
-	Parse(value string) (interface{}, error)
+	Parse(value string) (any, error)
 	// Set sets the flag's value to the given value
-	Set(value interface{}) error
+	Set(value any) error
 	// GetBound returns the bound value of the flag.
-	GetBound() interface{}
+	GetBound() any
 }
 
 // Value returns the current value of the flag.
-func (f *Flag) GetValue() interface{} {
+func (f *Flag) GetValue() any {
 	if f == nil || f.value == nil {
 		return nil
 	}

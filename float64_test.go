@@ -82,7 +82,7 @@ func TestParsedGroup_GetFloat64(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "test-group",
-			Values: map[string]interface{}{"float64-test": 123.456},
+			Values: map[string]any{"float64-test": 123.456},
 		}
 
 		value, err := parsedGroup.GetFloat64("float64-test")
@@ -95,7 +95,7 @@ func TestParsedGroup_GetFloat64(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "test-group",
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 
 		_, err := parsedGroup.GetFloat64("non-existing")
@@ -107,7 +107,7 @@ func TestParsedGroup_GetFloat64(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "test-group",
-			Values: map[string]interface{}{"invalid-test": "not-a-float"},
+			Values: map[string]any{"invalid-test": "not-a-float"},
 		}
 
 		_, err := parsedGroup.GetFloat64("invalid-test")

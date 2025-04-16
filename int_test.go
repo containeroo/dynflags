@@ -77,7 +77,7 @@ func TestParsedGroup_GetInt(t *testing.T) {
 		t.Parallel()
 
 		parsedGroup := &dynflags.ParsedGroup{
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"test-int": 42,
 			},
 		}
@@ -90,7 +90,7 @@ func TestParsedGroup_GetInt(t *testing.T) {
 		t.Parallel()
 
 		parsedGroup := &dynflags.ParsedGroup{
-			Values: make(map[string]interface{}),
+			Values: make(map[string]any),
 		}
 		_, err := parsedGroup.GetInt("non-existent")
 		assert.Error(t, err)
@@ -100,7 +100,7 @@ func TestParsedGroup_GetInt(t *testing.T) {
 		t.Parallel()
 
 		parsedGroup := &dynflags.ParsedGroup{
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"test-int": "not an int",
 			},
 		}

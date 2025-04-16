@@ -75,7 +75,7 @@ func TestGetBoolSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name: "testGroup",
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"flag1": []bool{true, false, true},
 			},
 		}
@@ -90,7 +90,7 @@ func TestGetBoolSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name: "testGroup",
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"flag1": true,
 			},
 		}
@@ -105,7 +105,7 @@ func TestGetBoolSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 
 		result, err := parsedGroup.GetBoolSlices("nonExistentFlag")
@@ -119,7 +119,7 @@ func TestGetBoolSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name: "testGroup",
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"flag1": "invalid",
 			},
 		}

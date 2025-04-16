@@ -65,7 +65,7 @@ func TestParsedGroupGetString(t *testing.T) {
 		t.Parallel()
 
 		group := &dynflags.ParsedGroup{
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"stringFlag": "value",
 			},
 		}
@@ -78,7 +78,7 @@ func TestParsedGroupGetString(t *testing.T) {
 		t.Parallel()
 
 		group := &dynflags.ParsedGroup{
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 		str, err := group.GetString("stringFlag")
 		assert.Error(t, err)
@@ -90,7 +90,7 @@ func TestParsedGroupGetString(t *testing.T) {
 		t.Parallel()
 
 		group := &dynflags.ParsedGroup{
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"stringFlag": 123, // Invalid type
 			},
 		}

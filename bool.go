@@ -9,18 +9,18 @@ type BoolValue struct {
 	Bound *bool
 }
 
-func (b *BoolValue) GetBound() interface{} {
+func (b *BoolValue) GetBound() any {
 	if b.Bound == nil {
 		return nil
 	}
 	return *b.Bound
 }
 
-func (b *BoolValue) Parse(value string) (interface{}, error) {
+func (b *BoolValue) Parse(value string) (any, error) {
 	return strconv.ParseBool(value)
 }
 
-func (b *BoolValue) Set(value interface{}) error {
+func (b *BoolValue) Set(value any) error {
 	if val, ok := value.(bool); ok {
 		*b.Bound = val
 		return nil

@@ -10,14 +10,14 @@ type URLSlicesValue struct {
 	Bound *[]*url.URL
 }
 
-func (u *URLSlicesValue) GetBound() interface{} {
+func (u *URLSlicesValue) GetBound() any {
 	if u.Bound == nil {
 		return nil
 	}
 	return *u.Bound
 }
 
-func (u *URLSlicesValue) Parse(value string) (interface{}, error) {
+func (u *URLSlicesValue) Parse(value string) (any, error) {
 	parsedURL, err := url.Parse(value)
 	if err != nil {
 		return nil, fmt.Errorf("invalid URL: %s, error: %w", value, err)
@@ -25,7 +25,7 @@ func (u *URLSlicesValue) Parse(value string) (interface{}, error) {
 	return parsedURL, nil
 }
 
-func (u *URLSlicesValue) Set(value interface{}) error {
+func (u *URLSlicesValue) Set(value any) error {
 	if parsedURL, ok := value.(*url.URL); ok {
 		*u.Bound = append(*u.Bound, parsedURL)
 		return nil

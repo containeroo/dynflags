@@ -76,7 +76,7 @@ func TestGetDurationSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name: "testGroup",
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"flag1": []time.Duration{1 * time.Second, 2 * time.Second, 3 * time.Second},
 			},
 		}
@@ -91,7 +91,7 @@ func TestGetDurationSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name: "testGroup",
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"flag1": 5 * time.Second,
 			},
 		}
@@ -106,7 +106,7 @@ func TestGetDurationSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 
 		result, err := parsedGroup.GetDurationSlices("nonExistentFlag")
@@ -120,7 +120,7 @@ func TestGetDurationSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name: "testGroup",
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"flag1": "invalid",
 			},
 		}

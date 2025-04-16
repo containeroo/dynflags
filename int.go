@@ -9,18 +9,18 @@ type IntValue struct {
 	Bound *int
 }
 
-func (i *IntValue) GetBound() interface{} {
+func (i *IntValue) GetBound() any {
 	if i.Bound == nil {
 		return nil
 	}
 	return *i.Bound
 }
 
-func (i *IntValue) Parse(value string) (interface{}, error) {
+func (i *IntValue) Parse(value string) (any, error) {
 	return strconv.Atoi(value)
 }
 
-func (i *IntValue) Set(value interface{}) error {
+func (i *IntValue) Set(value any) error {
 	if num, ok := value.(int); ok {
 		*i.Bound = num
 		return nil

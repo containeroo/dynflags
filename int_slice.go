@@ -10,14 +10,14 @@ type IntSlicesValue struct {
 	Bound *[]int
 }
 
-func (i *IntSlicesValue) GetBound() interface{} {
+func (i *IntSlicesValue) GetBound() any {
 	if i.Bound == nil {
 		return nil
 	}
 	return *i.Bound
 }
 
-func (s *IntSlicesValue) Parse(value string) (interface{}, error) {
+func (s *IntSlicesValue) Parse(value string) (any, error) {
 	parsedValue, err := strconv.Atoi(value)
 	if err != nil {
 		return nil, fmt.Errorf("invalid integer value: %s", value)
@@ -25,7 +25,7 @@ func (s *IntSlicesValue) Parse(value string) (interface{}, error) {
 	return parsedValue, nil
 }
 
-func (s *IntSlicesValue) Set(value interface{}) error {
+func (s *IntSlicesValue) Set(value any) error {
 	if num, ok := value.(int); ok {
 		*s.Bound = append(*s.Bound, num)
 		return nil

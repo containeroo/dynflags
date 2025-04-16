@@ -10,14 +10,14 @@ type BoolSlicesValue struct {
 	Bound *[]bool
 }
 
-func (b *BoolSlicesValue) GetBound() interface{} {
+func (b *BoolSlicesValue) GetBound() any {
 	if b.Bound == nil {
 		return nil
 	}
 	return *b.Bound
 }
 
-func (b *BoolSlicesValue) Parse(value string) (interface{}, error) {
+func (b *BoolSlicesValue) Parse(value string) (any, error) {
 	parsed, err := strconv.ParseBool(value)
 	if err != nil {
 		return nil, fmt.Errorf("invalid boolean value: %s, error: %w", value, err)
@@ -25,7 +25,7 @@ func (b *BoolSlicesValue) Parse(value string) (interface{}, error) {
 	return parsed, nil
 }
 
-func (b *BoolSlicesValue) Set(value interface{}) error {
+func (b *BoolSlicesValue) Set(value any) error {
 	if parsedBool, ok := value.(bool); ok {
 		*b.Bound = append(*b.Bound, parsedBool)
 		return nil

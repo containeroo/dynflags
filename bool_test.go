@@ -97,7 +97,7 @@ func TestParsedGroup_GetBool(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"testBool": true},
+			Values: map[string]any{"testBool": true},
 		}
 		value, err := parsedGroup.GetBool("testBool")
 		assert.NoError(t, err)
@@ -109,7 +109,7 @@ func TestParsedGroup_GetBool(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 		value, err := parsedGroup.GetBool("nonExistent")
 		assert.Error(t, err)
@@ -122,7 +122,7 @@ func TestParsedGroup_GetBool(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"invalidBool": "notABool"},
+			Values: map[string]any{"invalidBool": "notABool"},
 		}
 		value, err := parsedGroup.GetBool("invalidBool")
 		assert.Error(t, err)

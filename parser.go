@@ -123,7 +123,7 @@ func (df *DynFlags) createOrGetParsedGroup(parentGroup *ConfigGroup, identifier 
 	newGroup := &ParsedGroup{
 		Parent: parentGroup,
 		Name:   identifier,
-		Values: make(map[string]interface{}),
+		Values: make(map[string]any),
 	}
 	df.parsedGroups[parentGroup.Name][identifier] = newGroup
 	return newGroup

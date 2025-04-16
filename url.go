@@ -9,18 +9,18 @@ type URLValue struct {
 	Bound *url.URL
 }
 
-func (u *URLValue) GetBound() interface{} {
+func (u *URLValue) GetBound() any {
 	if u.Bound == nil {
 		return nil
 	}
 	return *u.Bound
 }
 
-func (u *URLValue) Parse(value string) (interface{}, error) {
+func (u *URLValue) Parse(value string) (any, error) {
 	return url.Parse(value)
 }
 
-func (u *URLValue) Set(value interface{}) error {
+func (u *URLValue) Set(value any) error {
 	if parsedURL, ok := value.(*url.URL); ok {
 		*u.Bound = *parsedURL
 		return nil

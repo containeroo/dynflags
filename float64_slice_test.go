@@ -75,7 +75,7 @@ func TestGetFloat64Slices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": []float64{1.1, 2.2, 3.3}},
+			Values: map[string]any{"flag1": []float64{1.1, 2.2, 3.3}},
 		}
 
 		result, err := parsedGroup.GetFloat64Slices("flag1")
@@ -88,7 +88,7 @@ func TestGetFloat64Slices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": 42.42},
+			Values: map[string]any{"flag1": 42.42},
 		}
 
 		result, err := parsedGroup.GetFloat64Slices("flag1")
@@ -101,7 +101,7 @@ func TestGetFloat64Slices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 
 		result, err := parsedGroup.GetFloat64Slices("nonExistentFlag")
@@ -115,7 +115,7 @@ func TestGetFloat64Slices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": "invalid"},
+			Values: map[string]any{"flag1": "invalid"},
 		}
 
 		result, err := parsedGroup.GetFloat64Slices("flag1")

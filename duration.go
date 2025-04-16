@@ -9,18 +9,18 @@ type DurationValue struct {
 	Bound *time.Duration
 }
 
-func (d *DurationValue) GetBound() interface{} {
+func (d *DurationValue) GetBound() any {
 	if d.Bound == nil {
 		return nil
 	}
 	return *d.Bound
 }
 
-func (d *DurationValue) Parse(value string) (interface{}, error) {
+func (d *DurationValue) Parse(value string) (any, error) {
 	return time.ParseDuration(value)
 }
 
-func (d *DurationValue) Set(value interface{}) error {
+func (d *DurationValue) Set(value any) error {
 	if dur, ok := value.(time.Duration); ok {
 		*d.Bound = dur
 		return nil

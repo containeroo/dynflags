@@ -8,13 +8,13 @@ type IdentifiersMap map[string]*ParsedGroup
 
 // ParsedGroup represents a runtime group with parsed values.
 type ParsedGroup struct {
-	Parent *ConfigGroup           // Reference to the parent static group.
-	Name   string                 // Identifier for the child group (e.g., "IDENTIFIER1").
-	Values map[string]interface{} // Parsed values for the group's flags.
+	Parent *ConfigGroup   // Reference to the parent static group.
+	Name   string         // Identifier for the child group (e.g., "IDENTIFIER1").
+	Values map[string]any // Parsed values for the group's flags.
 }
 
 // Lookup retrieves the value of a flag in the parsed group.
-func (g *ParsedGroup) Lookup(flagName string) interface{} {
+func (g *ParsedGroup) Lookup(flagName string) any {
 	if g == nil {
 		return nil
 	}

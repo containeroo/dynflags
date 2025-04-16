@@ -94,7 +94,7 @@ func TestParsedGroupGetURL(t *testing.T) {
 
 		parsedURL, _ := url.Parse("https://example.com")
 		group := &dynflags.ParsedGroup{
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"urlFlag": *parsedURL,
 			},
 		}
@@ -108,7 +108,7 @@ func TestParsedGroupGetURL(t *testing.T) {
 		t.Parallel()
 
 		group := &dynflags.ParsedGroup{
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 		retrievedURL, err := group.GetURL("urlFlag")
 		assert.Error(t, err)
@@ -120,7 +120,7 @@ func TestParsedGroupGetURL(t *testing.T) {
 		t.Parallel()
 
 		group := &dynflags.ParsedGroup{
-			Values: map[string]interface{}{
+			Values: map[string]any{
 				"urlFlag": "not-a-url", // Invalid type
 			},
 		}

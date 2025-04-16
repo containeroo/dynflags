@@ -104,7 +104,7 @@ func TestGetStringSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": []string{"value1", "value2"}},
+			Values: map[string]any{"flag1": []string{"value1", "value2"}},
 		}
 
 		result, err := parsedGroup.GetStringSlices("flag1")
@@ -117,7 +117,7 @@ func TestGetStringSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": "singleValue"},
+			Values: map[string]any{"flag1": "singleValue"},
 		}
 
 		result, err := parsedGroup.GetStringSlices("flag1")
@@ -130,7 +130,7 @@ func TestGetStringSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{},
+			Values: map[string]any{},
 		}
 
 		result, err := parsedGroup.GetStringSlices("nonExistentFlag")
@@ -144,7 +144,7 @@ func TestGetStringSlices(t *testing.T) {
 
 		parsedGroup := &dynflags.ParsedGroup{
 			Name:   "testGroup",
-			Values: map[string]interface{}{"flag1": 123}, // Invalid type (int)
+			Values: map[string]any{"flag1": 123}, // Invalid type (int)
 		}
 
 		result, err := parsedGroup.GetStringSlices("flag1")

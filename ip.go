@@ -9,14 +9,14 @@ type IPValue struct {
 	Bound *net.IP
 }
 
-func (i *IPValue) GetBound() interface{} {
+func (i *IPValue) GetBound() any {
 	if i.Bound == nil {
 		return nil
 	}
 	return *i.Bound
 }
 
-func (u *IPValue) Parse(value string) (interface{}, error) {
+func (u *IPValue) Parse(value string) (any, error) {
 	result := net.ParseIP(value)
 	if result == nil {
 		return nil, fmt.Errorf("invalid IP address: %s", value)
@@ -24,7 +24,7 @@ func (u *IPValue) Parse(value string) (interface{}, error) {
 	return &result, nil
 }
 
-func (u *IPValue) Set(value interface{}) error {
+func (u *IPValue) Set(value any) error {
 	if parsedIP, ok := value.(*net.IP); ok {
 		*u.Bound = *parsedIP
 		return nil
