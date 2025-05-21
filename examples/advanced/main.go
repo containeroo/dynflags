@@ -119,11 +119,13 @@ func setupDynamicFlags() *dynflags.DynFlags {
 // setupUsage sets a custom usage function that prints both pflag and dynflags usage.
 func setupUsage(flagSet *flag.FlagSet, dynFlags *dynflags.DynFlags) {
 	flagSet.Usage = func() {
-		fmt.Fprintf(flagSet.Output(), "Usage: %s [GLOBAL FLAGS...] [DYNAMIC FLAGS...]\n", flagSet.Name())
-		fmt.Fprintln(flagSet.Output(), "\nGlobal Flags:")
+		out := flagSet.Output() // capture writer ONCE
+
+		fmt.Fprintf(out, "Usage: %s [GLOBAL FLAGS...] [DYNAMIC FLAGS...]\n", flagSet.Name()) // nolint:errcheck
+		fmt.Fprintln(out, "\nGlobal Flags:")                                                 // nolint:errcheck
 		flagSet.PrintDefaults()
 
-		fmt.Fprintln(flagSet.Output(), "\nDynamic Flags:")
+		fmt.Fprintln(out, "\nDynamic Flags:") // nolint:errcheck
 		dynFlags.PrintDefaults()
 	}
 }
@@ -171,11 +173,11 @@ func main() {
 		// If the user requested help or version, print the message and exit
 		var hr *HelpRequested
 		if errors.As(err, &hr) {
-			fmt.Fprint(output, hr.Message)
+			fmt.Fprint(output, hr.Message) //nolint:errcheck
 			return
 		}
 
-		fmt.Fprintf(output, "Failed to parse flags: %v\n", err)
+		fmt.Fprintf(output, "Failed to parse flags: %v\n", err) // nolint:errcheck
 		os.Exit(1)
 	}
 
