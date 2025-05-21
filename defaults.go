@@ -10,18 +10,17 @@ import (
 // PrintDefaults prints all registered flags
 func (df *DynFlags) PrintDefaults() {
 	w := tabwriter.NewWriter(df.output, 0, 8, 2, ' ', 0)
-	defer w.Flush()
 
 	// Print title if present
 	if df.title != "" {
-		fmt.Fprintln(df.output, df.title)
-		fmt.Fprintln(df.output)
+		fmt.Fprintln(df.output, df.title) // nolint:errcheck
+		fmt.Fprintln(df.output)           // nolint:errcheck
 	}
 
 	// Print description if present
 	if df.description != "" {
-		fmt.Fprintln(df.output, df.description)
-		fmt.Fprintln(df.output)
+		fmt.Fprintln(df.output, df.description) // nolint:errcheck
+		fmt.Fprintln(df.output)                 // nolint:errcheck
 	}
 
 	// Sort group names
@@ -35,9 +34,9 @@ func (df *DynFlags) PrintDefaults() {
 
 		// Print group usage or fallback to uppercase group name
 		if group.usage != "" {
-			fmt.Fprintln(w, group.usage)
+			fmt.Fprintln(w, group.usage) // nolint:errcheck
 		} else {
-			fmt.Fprintln(w, strings.ToUpper(groupName))
+			fmt.Fprintln(w, strings.ToUpper(groupName)) // nolint:errcheck
 		}
 
 		// Sort flag names
@@ -47,7 +46,7 @@ func (df *DynFlags) PrintDefaults() {
 
 		// Print flags for the group
 		if len(group.flagOrder) > 0 {
-			fmt.Fprintln(w, "  Flag\tUsage")
+			fmt.Fprintln(w, "  Flag\tUsage") // nolint:errcheck
 			for _, flagName := range group.flagOrder {
 				flag := group.Flags[flagName]
 				usage := flag.Usage
@@ -59,15 +58,18 @@ func (df *DynFlags) PrintDefaults() {
 					metavar = flag.metaVar
 				}
 
-				fmt.Fprintf(w, "  --%s.<IDENTIFIER>.%s %s\t%s\n", groupName, flagName, metavar, usage)
+				fmt.Fprintf(w, "  --%s.<IDENTIFIER>.%s %s\t%s\n", groupName, flagName, metavar, usage) // nolint:errcheck
 			}
-			fmt.Fprintln(w, "")
+			fmt.Fprintln(w, "") // nolint:errcheck
 		}
 	}
 
+	// tabwriter buffers output for alignment; flush now to ensure aligned flag output is printed before the epilog
+	w.Flush() // nolint:errcheck
+
 	// Print epilog if present
 	if df.epilog != "" {
-		fmt.Fprintln(df.output)
-		fmt.Fprintln(df.output, df.epilog)
+		fmt.Fprintln(df.output)            // nolint:errcheck
+		fmt.Fprintln(df.output, df.epilog) // nolint:errcheck
 	}
 }
