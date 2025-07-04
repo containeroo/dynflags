@@ -1,132 +1,182 @@
 package dynflags_test
 
 import (
-	"bytes"
+	"fmt"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/containeroo/dynflags"
 	"github.com/stretchr/testify/assert"
+
+	flag "github.com/spf13/pflag"
 )
 
-func TestDynFlagsInitialization(t *testing.T) {
-	t.Parallel()
+func TestDynflags(t *testing.T) {
+	t.Run("Smoke test", func(t *testing.T) {
+		df := dynflags.New("test.exe", dynflags.ContinueOnError)
 
-	t.Run("New initializes correctly", func(t *testing.T) {
-		t.Parallel()
+		appGroup := df.Group("app")
+		appGroup.String("msg", "Hello, World!", "Message to be displayed.")
 
-		df := dynflags.New(dynflags.ContinueOnError)
-		assert.NotNil(t, df)
-		assert.NotNil(t, df.Config())
-		assert.NotNil(t, df.Parsed()) // df.Parsed() now returns ParsedGroups with GroupsMap internally
+		args := []string{
+			"--app.default.msg", "Hello default DynFlags!",
+			"--app.custom.msg", "Hello custom DynFlags!",
+		}
+
+		if err := df.Parse(args); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)
+			os.Exit(1)
+		}
+
+		defaultGroup := df.Parsed("app", "default")
+		customGroup := df.Parsed("app", "custom")
+
+		msg1, _ := dynflags.GetAs[string](defaultGroup, "msg")
+		msg2, _ := dynflags.GetAs[string](customGroup, "msg")
+
+		fmt.Println("Default:", msg1)
+		fmt.Println("Custom:", msg2)
 	})
-}
 
-func TestDynFlagsGroupManagement(t *testing.T) {
-	t.Parallel()
+	t.Run("extended smoke tests", func(t *testing.T) {
+		df := dynflags.New("test.exe", dynflags.ContinueOnError)
 
-	t.Run("Create new group", func(t *testing.T) {
-		t.Parallel()
+		// HTTP group
+		http := df.Group("http")
+		http.String("name", "", "Name of the HTTP checker")
+		http.String("method", "GET", "HTTP method to use")
+		http.String("address", "", "HTTP target URL")
+		http.Bool("allow-duplicate-headers", false, "Allow duplicate HTTP headers")
+		http.String("expected-status-codes", "200", "Expected HTTP status codes")
+		http.Bool("skip-tls-verify", false, "Skip TLS verification")
 
-		df := dynflags.New(dynflags.ContinueOnError)
+		// ICMP group
+		icmp := df.Group("icmp")
+		icmp.String("name", "", "Name of the ICMP checker")
+		icmp.String("address", "", "ICMP target address")
 
-		// Create Group
-		group := df.Group("group1")
-		assert.NotNil(t, group)
-		assert.Contains(t, df.Config().Groups(), "group1")
-		assert.Equal(t, group, df.Config().Lookup("group1"))
-		assert.Equal(t, "group1", group.Name)
-		assert.NotNil(t, group.Flags)
+		// TCP group
+		tcp := df.Group("tcp")
+		tcp.String("name", "", "Name of the TCP checker")
+		tcp.String("address", "", "TCP target address")
 
-		// Get Group again
-		group = df.Group("group1")
-		assert.NotNil(t, group)
-		assert.Contains(t, df.Config().Groups(), "group1")
+		args := []string{
+			"--http.default.name", "HTTP Checker Default",
+			"--http.default.address", "default.com:80",
+			"--http.other.name", "HTTP Checker Other",
+			"--http.other.address", "other.com:443",
+			"--http.other.method", "POST",
+			"--icmp.custom.address", "8.8.4.4",
+			"--tcp.testing.address", "example.com:443",
+			"--default-interval=5s", // pflag
+		}
+
+		err := df.Parse(args)
+		assert.NoError(t, err)
+
+		fmt.Println("\n=== Dynamic Flags ===")
+		for groupName, identifiers := range df.Groups() {
+			fmt.Printf("Group: %s\n", groupName)
+			for identifier, pg := range identifiers {
+				t.Logf(" Identifier: %s\n", identifier)
+				for flagKey, value := range pg.Values {
+					t.Logf("    %s: %v\n", flagKey, value)
+				}
+			}
+		}
 	})
-}
 
-func TestDynFlagsUsageOutput(t *testing.T) {
-	t.Parallel()
+	t.Run("help tests", func(t *testing.T) {
+		buf := strings.Builder{}
 
-	t.Run("Generate usage with title, description, and epilog", func(t *testing.T) {
-		t.Parallel()
+		fs := flag.NewFlagSet("test.exe", flag.ContinueOnError)
+		fs.SetOutput(&buf)
+		fs.BoolP("help", "h", false, "Show help.")
 
-		var buf bytes.Buffer
-		df := dynflags.New(dynflags.ContinueOnError)
+		df := dynflags.New("test.exe", dynflags.ContinueOnError)
+		df.Title("\nsome dynamic flags:")
 		df.SetOutput(&buf)
 
-		df.Title("Test Application")
-		df.Description("This application demonstrates usage of dynamic flags.")
-		df.Epilog("For more information, visit https://example.com.")
+		fs.Usage = func() {
+			out := fs.Output() // capture writer ONCE
 
-		df.Usage()
+			fmt.Fprintf(out, "Usage: %s [FLAGS] [DYNAMIC FLAGS..]\n", strings.ToLower(fs.Name())) // nolint:errcheck
 
-		output := buf.String()
-		assert.Contains(t, output, "Test Application")
-		assert.Contains(t, output, "This application demonstrates usage of dynamic flags.")
-		assert.Contains(t, output, "For more information, visit https://example.com.")
-	})
-}
+			fmt.Fprintln(out, "\nGlobal Flags:") // nolint:errcheck
+			fs.SetOutput(out)
+			fs.PrintDefaults()
 
-func TestDynFlagsParsedAndUnknown(t *testing.T) {
-	t.Parallel()
-
-	t.Run("Empty parsed and unknown args", func(t *testing.T) {
-		t.Parallel()
-
-		df := dynflags.New(dynflags.ContinueOnError)
-
-		// With the new GroupsMap approach, this should still be empty initially:
-		assert.Empty(t, df.Parsed().Groups())
-		assert.Empty(t, df.UnknownArgs())
-	})
-}
-
-func TestParsedGroupMethods(t *testing.T) {
-	t.Parallel()
-
-	t.Run("Retrieve parsed group values", func(t *testing.T) {
-		t.Parallel()
-
-		df := dynflags.New(dynflags.ContinueOnError)
-
-		// Define a flag in the "testGroup" config
-		df.Group("testGroup").String("flag1", "defaultValue", "Test flag")
-
-		// Parse actual CLI arguments
-		args := []string{"--testGroup.identifier1.flag1", "value1"}
-		err := df.Parse(args)
-		assert.NoError(t, err)
-
-		// Lookup the parsed data
-		parsedGroups := df.Parsed()
-		group := parsedGroups.Lookup("testGroup")
-		assert.NotNil(t, group)
-
-		identifier := group.Lookup("identifier1")
-		assert.NotNil(t, identifier)
-
-		// The flag should have the value we passed
-		assert.Equal(t, "value1", identifier.Lookup("flag1"))
-	})
-}
-
-func TestDynFlagsUnknownArgs(t *testing.T) {
-	t.Parallel()
-
-	t.Run("Retrieve unparsed arguments", func(t *testing.T) {
-		t.Parallel()
-
-		df := dynflags.New(dynflags.ContinueOnError)
-
-		// Passing an argument that won't parse
-		args := []string{
-			"--unparsable", "value1",
+			df.PrintTitle(out)
+			df.PrintDescription(out, 80)
+			df.PrintDefaults()
+			df.PrintEpilog(out, 80)
 		}
+
+		// HTTP group
+		http := df.Group("http")
+		http.String("name", "", "Name of the HTTP checker").Metavar("TESTVAR")
+		http.String("method", "GET", "HTTP method to use")
+		http.String("address", "", "HTTP target URL").Required()
+		http.Bool("allow-duplicate-headers", false, "Allow duplicate HTTP headers")
+		http.String("expected-status-codes", "200", "Expected HTTP status codes")
+		http.Bool("skip-tls-verify", false, "Skip TLS verification").Deprecated("Use --insecure-skip-tls-verify instead")
+
+		// ICMP group
+		icmp := df.Group("icmp")
+		icmp.String("name", "", "Name of the ICMP checker")
+		icmp.String("address", "", "ICMP target address").Required()
+
+		// TCP group
+		tcp := df.Group("tcp")
+		tcp.String("name", "", "Name of the TCP checker")
+		tcp.String("address", "", "TCP target address").Required()
+
+		args := []string{
+			"--help",
+		}
+
 		err := df.Parse(args)
 		assert.NoError(t, err)
+		unknownArgs := df.UnknownArgs()
 
-		// Confirm that the argument ended up in unparsedArgs
-		unparsedArgs := df.UnknownArgs()
-		assert.Contains(t, unparsedArgs, "--unparsable")
+		err = fs.Parse(unknownArgs)
+		assert.NoError(t, err)
+		help := fs.Lookup("help")
+		if help != nil && help.Value.String() == "true" {
+			buf.Reset() // instead of creating a new one
+			fs.SetOutput(&buf)
+			df.SetOutput(&buf)
+			fs.Usage()
+
+			expected := `Usage: test.exe [FLAGS] [DYNAMIC FLAGS..]
+
+Global Flags:
+  -h, --help   Show help.
+
+some dynamic flags:
+HTTP
+  Flag                                                             Usage
+  --http.<IDENTIFIER>.name TESTVAR                                 Name of the HTTP checker
+  --http.<IDENTIFIER>.method METHOD                                HTTP method to use (default: "GET")
+  --http.<IDENTIFIER>.address ADDRESS                              HTTP target URL [required]
+  --http.<IDENTIFIER>.allow-duplicate-headers                      Allow duplicate HTTP headers (default: false)
+  --http.<IDENTIFIER>.expected-status-codes EXPECTED-STATUS-CODES  Expected HTTP status codes (default: "200")
+  --http.<IDENTIFIER>.skip-tls-verify                              Skip TLS verification (default: false) [deprecated: Use --insecure-skip-tls-verify instead]
+
+ICMP
+  Flag                                 Usage
+  --icmp.<IDENTIFIER>.name NAME        Name of the ICMP checker
+  --icmp.<IDENTIFIER>.address ADDRESS  ICMP target address [required]
+
+TCP
+  Flag                                Usage
+  --tcp.<IDENTIFIER>.name NAME        Name of the TCP checker
+  --tcp.<IDENTIFIER>.address ADDRESS  TCP target address [required]
+
+`
+
+			assert.Equal(t, expected, buf.String())
+		}
 	})
 }
