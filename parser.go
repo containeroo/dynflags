@@ -5,15 +5,13 @@ import (
 	"strings"
 )
 
-// Parse parses the CLI arguments and populates parsed and unknown groups.
+// Parse parses the provided CLI arguments.
 func (df *DynFlags) Parse(args []string) error {
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 
-		// Extract the key and value
-		fullKey, value, err := df.extractKeyValue(arg, args, &i)
+		key, val, err := df.extractKeyValue(arg, args, &i)
 		if err != nil {
-			// Handle unparseable arguments
 			if df.parseBehavior == ExitOnError {
 				return err
 			}
@@ -21,10 +19,8 @@ func (df *DynFlags) Parse(args []string) error {
 			continue
 		}
 
-		// Validate and split the key
-		parentName, identifier, flagName, err := df.splitKey(fullKey)
+		groupName, ident, flagName, err := df.splitKey(key)
 		if err != nil {
-			// Handle invalid keys
 			if df.parseBehavior == ExitOnError {
 				return err
 			}
@@ -32,8 +28,8 @@ func (df *DynFlags) Parse(args []string) error {
 			continue
 		}
 
-		// Handle the flag
-		if err := df.handleFlag(parentName, identifier, flagName, value); err != nil {
+		err = df.setFlag(groupName, ident, flagName, val)
+		if err != nil {
 			if df.parseBehavior == ExitOnError {
 				return err
 			}
@@ -43,88 +39,72 @@ func (df *DynFlags) Parse(args []string) error {
 	return nil
 }
 
-// extractKeyValue extracts the key and value from an argument.
-func (df *DynFlags) extractKeyValue(arg string, args []string, index *int) (key, value string, err error) {
+// extractKeyValue supports --key=value or --key value syntax.
+func (df *DynFlags) extractKeyValue(arg string, args []string, i *int) (key, value string, err error) {
 	if !strings.HasPrefix(arg, "--") {
-		// Invalid argument format
-		return "", "", fmt.Errorf("invalid argument format: %s", arg)
+		return "", "", fmt.Errorf("invalid flag: %s", arg)
 	}
 
 	arg = strings.TrimPrefix(arg, "--")
-
-	// Handle "--key=value" format
 	if strings.Contains(arg, "=") {
 		parts := strings.SplitN(arg, "=", 2)
 		return parts[0], parts[1], nil
 	}
 
-	// Handle "--key value" format
-	if *index+1 < len(args) && !strings.HasPrefix(args[*index+1], "--") {
-		*index++
-		return arg, args[*index], nil
+	// try next argument
+	if *i+1 < len(args) && !strings.HasPrefix(args[*i+1], "--") {
+		*i++
+		return arg, args[*i], nil
 	}
 
-	// Missing value for the key
-	return "", "", fmt.Errorf("missing value for flag: --%s", arg)
+	return "", "", fmt.Errorf("missing value for --%s", arg)
 }
 
-// splitKey validates and splits a key into its components.
-func (df *DynFlags) splitKey(fullKey string) (group, identifier, flag string, err error) {
-	parts := strings.Split(fullKey, ".")
+// splitKey expects group.identifier.flag pattern.
+func (df *DynFlags) splitKey(full string) (group, ident, flag string, err error) {
+	parts := strings.Split(full, ".")
 	if len(parts) != 3 {
-		return "", "", "", fmt.Errorf("flag must follow the pattern: --<group>.<identifier>.<flag>")
+		return "", "", "", fmt.Errorf("invalid flag key: --%s (must be --<group>.<identifier>.<flag>)", full)
 	}
 	return parts[0], parts[1], parts[2], nil
 }
 
-// handleFlag processes a known or unknown flag.
-func (df *DynFlags) handleFlag(parentName, identifier, flagName, value string) error {
-	if parentGroup, exists := df.configGroups[parentName]; exists {
-		if flag := parentGroup.Lookup(flagName); flag != nil {
-			// Known flag
-			parsedGroup := df.createOrGetParsedGroup(parentGroup, identifier)
-			return df.setFlagValue(parsedGroup, flagName, flag, value)
-		}
+// setFlag resolves and sets the value of a known flag.
+func (df *DynFlags) setFlag(groupName, ident, flagName, val string) error {
+	group, ok := df.groups[groupName]
+	if !ok {
+		return fmt.Errorf("group %q not defined", groupName)
 	}
 
-	// Unknown flag
-	return fmt.Errorf("unknown flag '%s' in group '%s'", flagName, parentName)
-}
+	flag := group.Lookup(flagName)
+	if flag == nil {
+		return fmt.Errorf("flag %q not found in group %q", flagName, groupName)
+	}
 
-// setFlagValue sets the value of a known flag in the parsed group.
-func (df *DynFlags) setFlagValue(parsedGroup *ParsedGroup, flagName string, flag *Flag, value string) error {
-	parsedValue, err := flag.value.Parse(value)
+	err := flag.value.Set(val)
 	if err != nil {
-		return fmt.Errorf("failed to parse value for flag '%s': %v", flagName, err)
+		return fmt.Errorf("failed to parse --%s.%s.%s: %w", groupName, ident, flagName, err)
 	}
 
-	if err := flag.value.Set(parsedValue); err != nil {
-		return fmt.Errorf("failed to set value for flag '%s': %v", flagName, err)
-	}
-
-	// Store the successfully parsed value
-	parsedGroup.Values[flagName] = parsedValue
+	pg := df.getParsedGroup(group, ident)
+	pg.Values[flagName] = flag.value.Get()
 	return nil
 }
 
-// createOrGetParsedGroup retrieves or initializes a parsed group using the new GroupsMap/IdentifiersMap.
-func (df *DynFlags) createOrGetParsedGroup(parentGroup *ConfigGroup, identifier string) *ParsedGroup {
-	// Ensure the parent group name has an IdentifiersMap
-	if _, exists := df.parsedGroups[parentGroup.Name]; !exists {
-		df.parsedGroups[parentGroup.Name] = make(IdentifiersMap)
+// getParsedGroup initializes or retrieves a parsed group for the identifier.
+func (df *DynFlags) getParsedGroup(group *ConfigGroup, ident string) *ParsedGroup {
+	if _, ok := df.parsed[group.Name]; !ok {
+		df.parsed[group.Name] = make(IdentifiersMap)
+	}
+	if pg, ok := df.parsed[group.Name][ident]; ok {
+		return pg
 	}
 
-	// Check if we already have a ParsedGroup for this identifier
-	if existingGroup, ok := df.parsedGroups[parentGroup.Name][identifier]; ok {
-		return existingGroup
-	}
-
-	// Otherwise, create a new ParsedGroup
-	newGroup := &ParsedGroup{
-		Parent: parentGroup,
-		Name:   identifier,
+	pg := &ParsedGroup{
+		Parent: group,
+		Name:   ident,
 		Values: make(map[string]any),
 	}
-	df.parsedGroups[parentGroup.Name][identifier] = newGroup
-	return newGroup
+	df.parsed[group.Name][ident] = pg
+	return pg
 }

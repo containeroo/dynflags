@@ -1,89 +1,128 @@
 package dynflags
 
 import (
-	"fmt"
 	"io"
 	"os"
 )
 
-// ParseBehavior defines how Parse should behave on errors.
+// ParseBehavior controls how parsing errors are handled.
 type ParseBehavior int
 
 const (
-	ContinueOnError ParseBehavior = iota // Continue parsing on error
-	ExitOnError                          // Exit on error
+	ContinueOnError ParseBehavior = iota
+	ExitOnError
+	PanicOnError
 )
 
-// DynFlags manages configuration and parsed values
+// DynFlags manages dynamic groups and their flags.
 type DynFlags struct {
-	configGroups  map[string]*ConfigGroup // Static parent groups
-	groupOrder    []string                // Order of group names
-	SortGroups    bool                    // Sort groups in help message
-	SortFlags     bool                    // Sort flags in help message
-	parsedGroups  GroupsMap               // Parsed child groups organized by parent group
-	parseBehavior ParseBehavior           // Parsing behavior
-	unparsedArgs  []string                // Arguments that couldn't be parsed
-	output        io.Writer               // Output for usage/help
-	usage         func()                  // Customizable usage function
-	title         string                  // Title in the help message
-	description   string                  // Description after the title in the help message
-	epilog        string                  // Epilog in the help message
+	parseBehavior ParseBehavior
+
+	groups     map[string]*ConfigGroup // All defined groups
+	groupOrder []string                // Preserve registration order
+
+	parsed GroupsMap // Parsed values
+	output io.Writer // Help output destination
+	Usage  func()    // Usage callback
+	name   string    // Optional program name
+	title  string    // Optional help title
+	desc   string    // Optional help description
+	epilog string    // Optional help footer
+
+	unparsedArgs []string // Unknown args for later inspection
+
+	sortGroups bool
+	sortFlags  bool
 }
 
-// New initializes a new DynFlags instance
-func New(behavior ParseBehavior) *DynFlags {
+// New creates a new DynFlags instance.
+func New(name string, behavior ParseBehavior) *DynFlags {
 	df := &DynFlags{
-		configGroups:  make(map[string]*ConfigGroup),
-		parsedGroups:  make(GroupsMap),
+		name:          name,
 		parseBehavior: behavior,
+		groups:        make(map[string]*ConfigGroup),
+		parsed:        make(GroupsMap),
 		output:        os.Stdout,
 	}
-	df.usage = func() { df.Usage() }
+	df.Usage = func() {
+		out := df.Output()
+		df.PrintTitle(out)
+		df.PrintUsage(out)
+		df.PrintDescription(out, 80)
+		df.PrintDefaults()
+		df.PrintEpilog(out, 80)
+	}
 	return df
 }
 
-// Title adds a title to the help message
+// Name returns the program name (for usage header).
+func (df *DynFlags) Name() string {
+	return df.name
+}
+
+// Title sets the optional help title.
 func (df *DynFlags) Title(title string) {
 	df.title = title
 }
 
-// Description adds a descripton after the Title
-func (df *DynFlags) Description(description string) {
-	df.description = description
+// Description sets the optional help description.
+func (df *DynFlags) Description(desc string) {
+	df.desc = desc
 }
 
-// Epilog adds an epilog after the description of the dynamic flags to the help message
+// Epilog sets the help footer.
 func (df *DynFlags) Epilog(epilog string) {
 	df.epilog = epilog
 }
 
-// Group defines a new group or retrieves an existing one
-func (df *DynFlags) Group(name string) *ConfigGroup {
-	if _, exists := df.configGroups[name]; exists {
-		return df.configGroups[name]
-	}
-
-	df.groupOrder = append(df.groupOrder, name)
-	group := &ConfigGroup{
-		Name:  name,
-		Flags: make(map[string]*Flag),
-	}
-	df.configGroups[name] = group
-	return group
+// SetOutput overrides the help output destination.
+func (df *DynFlags) SetOutput(w io.Writer) {
+	df.output = w
 }
 
-// UnknownArgs returns the list of unparseable arguments.
+// Output returns the current help output writer.
+func (df *DynFlags) Output() io.Writer {
+	return df.output
+}
+
+// UnknownArgs returns any unparsed CLI arguments.
 func (df *DynFlags) UnknownArgs() []string {
 	return df.unparsedArgs
 }
 
-// DefaultUsage provides the default usage output
-func (df *DynFlags) Usage() {
-	fmt.Fprintf(df.output, "Usage: [--<group>.<identifier>.<flag> value]\n\n")
-	df.PrintDefaults()
+// SortGroups enables/disables sorting of group names.
+func (df *DynFlags) SortGroups(enable bool) {
+	df.sortGroups = enable
 }
 
-// SetOutput sets the output writer
-func (df *DynFlags) SetOutput(buf io.Writer) {
-	df.output = buf
+// SortFlags enables/disables sorting of flags within a group.
+func (df *DynFlags) SortFlags(enable bool) {
+	df.sortFlags = enable
+}
+
+// Group returns an existing group or creates a new one.
+func (df *DynFlags) Group(name string) *ConfigGroup {
+	if g, ok := df.groups[name]; ok {
+		return g
+	}
+	group := &ConfigGroup{
+		Name:  name,
+		Flags: make(map[string]*Flag),
+	}
+	df.groups[name] = group
+	df.groupOrder = append(df.groupOrder, name)
+	return group
+}
+
+// Groups returns all parsed values.
+func (df *DynFlags) Groups() GroupsMap {
+	return df.parsed
+}
+
+// Parsed returns the parsed result for a specific group and identifier.
+func (df *DynFlags) Parsed(groupName, identifier string) *ParsedGroup {
+	if idMap, ok := df.parsed[groupName]; ok {
+		return idMap[identifier]
+	}
+	return nil
 }

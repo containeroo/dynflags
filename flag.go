@@ -1,51 +1,35 @@
 package dynflags
 
-type FlagType string
-
-const (
-	FlagTypeStringSlice   FlagType = "..STRINGs"
-	FlagTypeString        FlagType = "STRING"
-	FlagTypeInt           FlagType = "INT"
-	FlagTypeIntSlice      FlagType = "..INTs"
-	FlagTypeBool          FlagType = "BOOL"
-	FlagTypeBoolSlice     FlagType = "..BOOLs"
-	FlagTypeDuration      FlagType = "DURATION"
-	FlagTypeDurationSlice FlagType = "..DURATIONs"
-	FlagTypeFloat         FlagType = "FLOAT"
-	FlagTypeFloatSlice    FlagType = "..FLOATs"
-	FlagTypeIP            FlagType = "IP"
-	FlagTypeIPSlice       FlagType = "..IPs"
-	FlagTypeURL           FlagType = "URL"
-	FlagTypeURLSlice      FlagType = "..URLs"
-)
-
-// Flag represents a single configuration flag
+// Flag represents a dynamic flag definition (type, value, metadata, etc.)
 type Flag struct {
-	Default any       // Default value for the flag
-	Type    FlagType  // Type of the flag
-	Usage   string    // Description for usage
-	metaVar string    // MetaVar for flag
-	value   FlagValue // Encapsulated parsing and value-setting logic
+	name       string
+	usage      string
+	value      Value
+	required   bool
+	deprecated string
+	metavar    string
+	defaultSet bool
 }
 
-func (f *Flag) MetaVar(metaVar string) {
-	f.metaVar = metaVar
+// Value is implemented by all concrete flag value holders.
+type Value interface {
+	Set(string) error // parses and sets from string
+	Get() any         // returns the parsed value
+	Default() string  // stringified default
+	IsChanged() bool  // whether the value was explicitly set
 }
 
-// FlagValue interface encapsulates parsing and value-setting logic
-type FlagValue interface {
-	// Parse parses the given string value into the flag's value type
-	Parse(value string) (any, error)
-	// Set sets the flag's value to the given value
-	Set(value any) error
-	// GetBound returns the bound value of the flag.
-	GetBound() any
+// BoolFlag marks a flag as --flag (true) shorthand.
+type BoolFlag interface {
+	IsBoolFlag() bool
 }
 
-// Value returns the current value of the flag.
-func (f *Flag) GetValue() any {
-	if f == nil || f.value == nil {
-		return nil
-	}
-	return f.value.GetBound()
+// SliceFlag marks slice flags for internal classification.
+type SliceFlag interface {
+	isSlice()
+}
+
+// DelimiterSetter is implemented by slice values that support custom delimiters.
+type DelimiterSetter interface {
+	SetDelimiter(string)
 }
