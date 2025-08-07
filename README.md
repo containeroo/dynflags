@@ -1,3 +1,8 @@
+# DEPRECATION WARNING
+
+`DynFlags` is deprecated and will be removed in a future release.
+Use [tinyflags](https://github.com/containeroo/tinyflags) instead.
+
 # DynFlags
 
 **DynFlags** is a Go package designed for dynamically managing hierarchical command-line flags. It supports parsing flags with a structure like `--group.identifier.flag=value` while allowing dynamic group and flag registration at runtime. For "POSIX/GNU-style --flags" use the library [pflag](https://github.com/spf13/pflag).
@@ -228,4 +233,3 @@ TCP
 ## Examples
 
 The `examples` directory contains a simple example that demonstrates the usage of `dynflags`, as well as an advanced example that shows how to use `dynflags` with `pflag`.
-
